@@ -2,7 +2,7 @@
 #include <FHT.h>
 
 #define OCTAVE 1  // use the octave output function
-#define FHT_N 128 // set to 128 point FHT
+#define FHT_N 256 // set to 256 point FHT
 
 void fht_setup() {
   ADCSRA = 0xe5; // set the adc to free running mode
