@@ -1,28 +1,59 @@
 #define OCTAVE 1  // use the octave output function
 #define FHT_N 256 // set to 256 point FHT
-#define PIN1 6
-
 
 #include <FHT.h>
 #include <Adafruit_NeoPixel.h>
-#include "led.h"
-#include "fht.h"
 
+#define PIN1 6
+
+// Parameter 1 = number of pixels in strip
+// Parameter 2 = pin number (most are valid)
+// Parameter 3 = pixel type flags, add together as needed:
+//   NEO_RGB     Pixels are wired for RGB bitstream
+//   NEO_GRB     Pixels are wired for GRB bitstream
+//   NEO_KHZ400  400 KHz bitstream (e.g. FLORA pixels)
+//   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip)
 Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(60, PIN1, NEO_GRB + NEO_KHZ800);
+
+void fht_setup(){
+  ADCSRA = 0xe5; // set the adc to free running mode
+  ADMUX = 0x40; // use adc0
+  DIDR0 = 0x01; // turn off the digital input for adc0
+}
+
+void led_setup(){
+   strip1.begin();
+    strip1.show(); // show all pixels as 'off' to start
+}
+  
 // Setup system
 void setup(){
-  led_setup();
   fht_setup();
-  strip1.begin();
-  strip1.show();  // Show all pixels as 'off'
+  led_setup();
+}
 
+void led_loop() {
+  for(uint16_t i = 0; i < strip1.numPixels(); i++) {
+      strip1.setPixelColor(i, 0, 255, 255);
+      strip1.show();
+      delay(50);
+  }
+  
+  for(uint16_t i = 0; i < strip1.numPixels(); i++) {
+      strip1.setPixelColor(i, 255, 0, 255);
+      strip1.show();
+      delay(50);
+  }  
 }
 
 // Main operating loop
 void loop(){
   // Initialize variables
-  boolean frequency = true;
-  int bass, low_mid, high_mid, treble;
+  boolean frequency = false;
+  int bass;
+  int low_mid;
+  int high_mid;
+  int treble;
   byte outputs = 4;
   boolean test = true;
   unsigned long time = 0;
@@ -72,7 +103,6 @@ void loop(){
     else {
       // Read in volume output and key off of that
     }
-    
     if (test){
       led_loop();
     }
@@ -89,7 +119,7 @@ void loop(){
         delay(time - prev_time + 1);
       }
       prev_time = millis();
-      strip.show();
+      strip1.show();
     }
     
     
