@@ -46,11 +46,13 @@ void led_loop() {
     delay(50);
   }
 
+
   for(byte i = 0; i < strip1.numPixels(); i++) {
     strip1.setPixelColor(i, 255, 0, 255);
     strip1.show();
     delay(50);
   }  
+
 }
 
 // Main operating loop
@@ -59,7 +61,6 @@ void loop(){
   boolean frequency = true;
   int data;
   const byte outputs = 4;
-  boolean test = true;
   unsigned long time = 0;
   unsigned long prev_time = 0;
 
@@ -75,7 +76,7 @@ void loop(){
       // #endif
       TIMSK0 = 0; // turn off timer0 for lower jitter
 
-      for (byte i = 0 ; i < FHT_N ; i++) { // save 256 samples
+      for (int i = 0 ; i < FHT_N ; i++) { // save 256 samples
         while(!(ADCSRA & 0x10)); // wait for adc to be ready
         ADCSRA = 0xf5; // restart adc
         // data = analogRead(0);
@@ -86,9 +87,7 @@ void loop(){
         data <<= 6; // form into a 16b signed int
         fht_input[i] = data; // put real data into bins
       }
-#ifdef DEBUG
-      Serial.print(F("Obtained full set of data points."));
-#endif
+
       // interrupts();
       TIMSK0 = 1; // turn timer0 back on for timing measurements - may be needed
 
@@ -125,31 +124,36 @@ void loop(){
         Serial.println(msg4 + treble);
 #endif
 
-        if (!test){
-          for(int i = 0; i < bass; i++){
-            strip1.setPixelColor(i, 255, 0, 0); // set to red
-          }
-
-          // Delay function to prevent flickering the LEDs too quickly
-          time = millis();
-          if(time - prev_time < 50){
-            delay(time - prev_time + 1);
-          }
-          prev_time = millis();
-          strip1.show();
+#ifdef DEBUG
+        for(int i = 0; i < high_mid; i++){
+          strip1.setPixelColor(i, 0, 0, 255); // set to blue
         }
+        for(int i = high_mid; i < strip1.numPixels(); i++){
+          strip1.setPixelColor(i, 0, 0, 0);
+        }
+
+        // Delay function to prevent flickering the LEDs too quickly
+        time = millis();
+        if(time - prev_time < 50){
+          delay(time - prev_time + 1);
+        }
+        prev_time = millis();
+        strip1.show();
+#endif
+
+      }
+      else {
+        // Read in volume output and key off of that
       }
 
-    }
-    else {
-      // Read in volume output and key off of that
-    }
-
-    if (test){
+#ifndef DEBUG
       led_loop();
+#endif
     }
   }
 }
+
+
 
 
 
